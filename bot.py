@@ -14,7 +14,7 @@ from openai import OpenAI
 # ------------------------
 # Configurações GPT e Arduino
 # ------------------------
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="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")
 arduino = serial.Serial('COM5', 9600, timeout=1)
 time.sleep(2)
 
@@ -117,7 +117,7 @@ def process_input():
     text = user_input.text().strip()
     if not text:
         return
-    append_chat_card("Você", text, "#A6E1FA")
+    append_chat_card("Você", text, "#00B3FF")
     user_input.clear()
 
     # Chamada GPT
@@ -138,7 +138,7 @@ Responda apenas com comandos válidos ou respostas de chat.
     )
 
     reply = response.choices[0].message.content.strip()
-    append_chat_card("GPT", reply, "#F5CBA7")
+    append_chat_card("GPT", reply, "#FF0099")
 
     # Processa cada linha
     for linha in reply.splitlines():
