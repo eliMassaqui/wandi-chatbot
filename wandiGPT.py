@@ -8,8 +8,8 @@ from PyQt6.QtCore import Qt, QSize
 class WandiGPTApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Wandi-GPT Professional")
-        self.resize(1200, 800)
+        self.setWindowTitle("Wandi-GPT")
+        self.resize(800, 800)
         self.init_ui()
 
     def init_ui(self):
@@ -31,20 +31,12 @@ class WandiGPTApp(QMainWindow):
         self.top_layout.addWidget(self.btn_menu, alignment=Qt.AlignmentFlag.AlignCenter)
         self.main_layout.addWidget(self.top_container)
 
-        # 2. CONTAINER PRINCIPAL (Chat + Sidebar) - Onde aplicamos a sombra
+        # 2. CONTAINER PRINCIPAL (Chat)
         self.content_card = QFrame()
         self.content_card.setObjectName("content_card")
         self.card_layout = QHBoxLayout(self.content_card)
         self.card_layout.setContentsMargins(0, 0, 0, 0)
         self.card_layout.setSpacing(0)
-
-        # Efeito de Sombra Profissional
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(25)
-        shadow.setXOffset(0)
-        shadow.setYOffset(4)
-        shadow.setColor(QColor(0, 0, 0, 30))
-        self.content_card.setGraphicsEffect(shadow)
 
         # ÁREA DE CHAT
         self.chat_area = QTextEdit()
@@ -52,28 +44,11 @@ class WandiGPTApp(QMainWindow):
         self.chat_area.setPlaceholderText("Como posso ajudar você hoje?")
         self.chat_area.setObjectName("chat_display")
         self.card_layout.addWidget(self.chat_area, stretch=5)
-
-        # SIDEBAR (Colada conforme o desenho)
-        self.sidebar = QFrame()
-        self.sidebar.setFixedWidth(220)
-        self.sidebar.setObjectName("sidebar_pro")
-        self.side_layout = QVBoxLayout(self.sidebar)
-        self.side_layout.setContentsMargins(0, 10, 0, 10)
-        self.side_layout.setSpacing(5)
-
-        for i in range(7):
-            btn = QPushButton(f"  Histórico de Conversa {i+1}")
-            btn.setFixedHeight(50)
-            btn.setObjectName("side_btn")
-            self.side_layout.addWidget(btn)
-        
-        self.side_layout.addStretch()
-        self.card_layout.addWidget(self.sidebar)
         self.main_layout.addWidget(self.content_card)
 
         # 3. ÁREA DE INPUT (Centralizada embaixo)
         self.input_section = QVBoxLayout()
-        self.input_section.setContentsMargins(0, 10, 220, 0) # Alinhamento com o chat
+        self.input_section.setContentsMargins(100, 10, 100, 0) # Alinhamento com o chat
 
         # Seletores Texto/Voz (Pílulas Pequenas)
         self.tab_layout = QHBoxLayout()
@@ -90,7 +65,7 @@ class WandiGPTApp(QMainWindow):
 
         # Campo de Input
         self.input_field = QLineEdit()
-        self.input_field.setPlaceholderText("Digite sua mensagem para o Wandi-GPT...")
+        self.input_field.setPlaceholderText("Digite sua mensagem para o Wandi-GPT")
         self.input_field.setFixedHeight(60)
         self.input_field.setObjectName("main_input")
 
@@ -110,33 +85,13 @@ class WandiGPTApp(QMainWindow):
             
             #chat_display { 
                 background-color: white; 
-                border: 1px solid #e3e3e3; 
-                border-top-left-radius: 12px; 
-                border-bottom-left-radius: 12px;
+                border: 2px #e3e3e3; 
+                border-radius: 12px; 
                 border-right: none;
                 padding: 20px;
                 font-size: 14px;
                 color: #1f1f1f;
             }
-
-            #sidebar_pro { 
-                background-color: #f8f9fa; 
-                border: 1px solid #e3e3e3;
-                border-top-right-radius: 12px;
-                border-bottom-right-radius: 12px;
-            }
-
-            /* Botões da Sidebar */
-            #side_btn {
-                background-color: transparent;
-                border: none;
-                text-align: left;
-                padding-left: 15px;
-                color: #444746;
-                font-size: 13px;
-                border-radius: 0px;
-            }
-            #side_btn:hover { background-color: #eff1f3; color: #1a73e8; }
 
             /* Seletores Texto/Voz */
             #tab_active {
@@ -157,8 +112,9 @@ class WandiGPTApp(QMainWindow):
             /* Input Principal */
             #main_input {
                 background-color: #f0f4f9;
-                border: none;
-                border-radius: 30px;
+                border-top-left-radius: 8px; 
+                border-top-right-radius: 8px; 
+                border-bottom-left-radius: 8px;
                 padding: 0 25px;
                 font-size: 15px;
                 color: #1f1f1f;
