@@ -1,11 +1,12 @@
 import sys
 import qtawesome as qta
-import serial.tools.list_ports
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTextEdit, QLineEdit, QPushButton, 
-                             QFrame, QGraphicsDropShadowEffect, QLabel)
+                             QFrame, QGraphicsDropShadowEffect, QInputDialog)
 from PyQt6.QtGui import QColor
 from PyQt6.QtCore import Qt, QPropertyAnimation
+
+from backend import WandiBackend
 
 class HoverMenuBar(QFrame):
     def __init__(self, parent=None):
@@ -49,6 +50,7 @@ class HoverMenuBar(QFrame):
 class WandiGPTApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.backend = WandiBackend()
         self.setWindowTitle("Wandi-GPT | Especialista em Robótica")
         screen = QApplication.primaryScreen().geometry()
         self.resize(int(screen.width() * 0.50), int(screen.height() * 0.80))
@@ -64,27 +66,24 @@ class WandiGPTApp(QMainWindow):
         # TOPO
         self.header_layout = QHBoxLayout()
         
-        # Botão API
         self.btn_api = QPushButton(" API KEY")
         self.btn_api.setFixedSize(110, 40)
         self.btn_api.setObjectName("top_btn_pill")
+        self.btn_api.clicked.connect(self.configure_api_key)
         self.header_layout.addWidget(self.btn_api)
 
-        # BOTÃO DE CONEXÃO AUTOMÁTICA (Substituiu o Dropdown)
         self.btn_connect = QPushButton()
         self.btn_connect.setFixedSize(40, 40)
         self.btn_connect.setCursor(Qt.CursorShape.PointingHandCursor)
         self.btn_connect.setIcon(qta.icon('fa5s.plug', color='#5f6368'))
         self.btn_connect.setObjectName("connect_btn")
-        self.btn_connect.setToolTip("Conexão Automática de Hardware")
         self.btn_connect.clicked.connect(self.auto_connect_hardware)
         self.header_layout.addWidget(self.btn_connect)
         
         self.header_layout.addStretch()
 
-        # Menu de Opções
         self.horizontal_menu = HoverMenuBar()
-        self.horizontal_menu.btn_clear_chat.clicked.connect(lambda: self.chat_area.clear())
+        self.horizontal_menu.btn_clear_chat.clicked.connect(self.clear_chat_action)
         self.header_layout.addWidget(self.horizontal_menu)
         
         self.main_layout.addLayout(self.header_layout)
@@ -109,31 +108,57 @@ class WandiGPTApp(QMainWindow):
         
         self.input_field = QLineEdit(); self.input_field.setPlaceholderText("Escreva para o Wandi-GPT...")
         self.input_field.setFixedHeight(65); self.input_field.setObjectName("main_input")
+        self.input_field.returnPressed.connect(self.send_message)
         
         self.input_section.addLayout(self.tab_layout); self.input_section.addWidget(self.input_field)
         self.main_layout.addLayout(self.input_section)
 
         self.apply_styles()
 
+    def configure_api_key(self):
+        key, ok = QInputDialog.getText(self, "API", "Chave OpenAI:", QLineEdit.EchoMode.Password)
+        if ok and key:
+            self.backend.set_api_key(key)
+            self.chat_area.append("<br><b>SISTEMA:</b> API Key pronta.")
+
+    def send_message(self):
+        texto = self.input_field.text().strip()
+        if not texto: return
+        self.chat_area.append(f"<br><b style='color: #5f6368;'>VOCÊ:</b> {texto}")
+        self.input_field.clear()
+        
+        resposta = self.backend.get_chat_response(texto)
+        self.chat_area.append(f"<br><b style='color: #1a73e8;'>WANDI-GPT:</b> {resposta}")
+        self.chat_area.verticalScrollBar().setValue(self.chat_area.verticalScrollBar().maximum())
+
+    def clear_chat_action(self):
+        self.chat_area.clear()
+        self.backend.clear_history()
+
     def auto_connect_hardware(self):
-        """Lógica para busca e conexão automática"""
-        # Aqui entra sua lógica original de varrer as portas futuramente
+        """Usa o backend para buscar e conectar na porta COM"""
         if not self.is_connected:
-            self.chat_area.append("<br><b style='color: #1a73e8;'>SISTEMA:</b> Buscando hardware automaticamente...")
-            # Simulação de conexão:
-            self.is_connected = True
-            self.btn_connect.setIcon(qta.icon('fa5s.link', color='#1e8e3e')) # Verde para conectado
-            self.btn_connect.setStyleSheet("background-color: #e6f4ea; border: 1px solid #1e8e3e;")
+            self.chat_area.append("<br><b style='color: #1a73e8;'>SISTEMA:</b> Varrendo portas seriais...")
+            sucesso, mensagem = self.backend.auto_connect_serial()
+            
+            if sucesso:
+                self.is_connected = True
+                self.btn_connect.setIcon(qta.icon('fa5s.link', color='#1e8e3e'))
+                self.btn_connect.setStyleSheet("background-color: #e6f4ea; border: 1px solid #1e8e3e;")
+                self.chat_area.append(f"<br><b style='color: #1e8e3e;'>SISTEMA:</b> {mensagem}")
+            else:
+                self.chat_area.append(f"<br><b style='color: #d93025;'>SISTEMA:</b> {mensagem}")
         else:
+            msg = self.backend.disconnect_serial()
             self.is_connected = False
             self.btn_connect.setIcon(qta.icon('fa5s.plug', color='#5f6368'))
             self.btn_connect.setStyleSheet("")
-            self.chat_area.append("<br><b style='color: #d93025;'>SISTEMA:</b> Hardware desconectado.")
+            self.chat_area.append(f"<br><b style='color: #d93025;'>SISTEMA:</b> {msg}")
 
     def apply_styles(self):
         self.setStyleSheet("""
             #content_card { background-color: white; border-radius: 20px; }
-            #chat_display { background-color: white; border: 1px solid #e3e3e3; border-radius: 20px; padding: 30px; }
+            #chat_display { background-color: white; border: 1px solid #e3e3e3; border-radius: 20px; padding: 30px; font-size: 14px; }
             #top_btn_pill { background-color: white; border: 1px solid #dadce0; border-radius: 20px; color: #444746; font-weight: 600; }
             #connect_btn { background-color: white; border: 1px solid #dadce0; border-radius: 20px; }
             #connect_btn:hover { background-color: #f8f9fa; }
