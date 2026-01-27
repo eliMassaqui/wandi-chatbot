@@ -22,15 +22,6 @@ class WandiGPTApp(QMainWindow):
         self.main_layout.setContentsMargins(30, 20, 30, 30)
         self.main_layout.setSpacing(15)
 
-        # 1. MENU BAR SUPERIOR (Design Pílula)
-        self.top_container = QWidget()
-        self.top_layout = QHBoxLayout(self.top_container)
-        self.btn_menu = QPushButton("MENU BAR")
-        self.btn_menu.setFixedSize(180, 35)
-        self.btn_menu.setObjectName("top_menu")
-        self.top_layout.addWidget(self.btn_menu, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.main_layout.addWidget(self.top_container)
-
         # 2. CONTAINER PRINCIPAL (Chat)
         self.content_card = QFrame()
         self.content_card.setObjectName("content_card")
@@ -85,9 +76,8 @@ class WandiGPTApp(QMainWindow):
             
             #chat_display { 
                 background-color: white; 
-                border: 2px #e3e3e3; 
+                border: 2px #dadada; 
                 border-radius: 12px; 
-                border-right: none;
                 padding: 20px;
                 font-size: 14px;
                 color: #1f1f1f;
@@ -111,23 +101,14 @@ class WandiGPTApp(QMainWindow):
 
             /* Input Principal */
             #main_input {
-                background-color: #f0f4f9;
+                background-color: #ffffff;
+                border: 1px solid #757575;
                 border-top-left-radius: 8px; 
                 border-top-right-radius: 8px; 
                 border-bottom-left-radius: 8px;
                 padding: 0 25px;
                 font-size: 15px;
-                color: #1f1f1f;
-            }
-
-            /* Top Menu Bar */
-            #top_menu {
-                background-color: #ffffff;
-                border: 1px solid #c4c7c5;
-                border-radius: 17px;
-                color: #444746;
-                font-size: 11px;
-                font-weight: 600;
+                color: #171717;
             }
         """)
 
